@@ -77,10 +77,11 @@ jobs:
       run: ls -R artifacts
     
     - name: Create Release
-      uses: softprops/action-gh-release@v2
+      uses: ncipollo/release-action@v1
       with:
-        files: artifacts/**/*
+        artifacts: artifacts/**/*
+        artifactErrorsFailBuild: true
         draft: false
         prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        replacesArtifacts: true
+      token: ${{ secrets.GITHUB_TOKEN }}
