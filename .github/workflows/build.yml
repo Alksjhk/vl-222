@@ -74,14 +74,33 @@ jobs:
         path: artifacts
     
     - name: Display structure of downloaded files
-      run: ls -R artifacts
+      run: |
+        echo "=== Artifacts directory structure ==="
+        ls -R artifacts
+        echo ""
+        echo "=== Finding all executables ==="
+        find artifacts -type f -executable -o -name "*.exe"
+    
+    - name: Prepare release assets
+      run: |
+        mkdir -p release
+        for dir in artifacts/*/; do
+          if [ -d "$dir" ]; then
+            echo "Processing directory: $dir"
+            find "$dir" -maxdepth 1 -type f \( -executable -o -name "*.exe" \) -exec cp {} release/ \;
+          fi
+        done
+        echo "=== Release directory contents ==="
+        ls -lh release/
     
     - name: Create Release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: artifacts/**/*
+        artifacts: release/*
         artifactErrorsFailBuild: true
         draft: false
         prerelease: false
-        replacesArtifacts: true
-      token: ${{ secrets.GITHUB_TOKEN }}
+        generateReleaseNotes: true
+        makeLatest: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
